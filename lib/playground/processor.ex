@@ -35,7 +35,7 @@ alias Playground.Fallback
   end
 
   def handle_cast(:update, state) do
-    GenServer.cast(Playground.Fallback, {:put, state})
+    Fallback.put(state.imei)
 
     {:noreply, state}
   end

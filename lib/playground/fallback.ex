@@ -22,6 +22,7 @@ defmodule Playground.Fallback do
   end
 
   def put(imei) do
+    Logger.info("Update #{imei}")
     GenServer.cast(get_name(imei), :put)
   end
 
@@ -47,8 +48,12 @@ defmodule Playground.Fallback do
   end
 
   def handle_info(:check_end_of_processing, state) do
+    now = now()
     Logger.info("In handle_info, check_end_of_processing")
-    if now() - state.ts > state.trip_split_interval_in_seconds do
+    Logger.info("now - ts #{now - state.ts}")
+    Logger.info("interval #{state.trip_split_interval_in_seconds}")
+    Logger.info("#{now() - state.ts > state.trip_split_interval_in_seconds * 1000 }")
+    if now() - state.ts > state.trip_split_interval_in_seconds * 1000 do
       Logger.info("Send to DGA: #{inspect(state.imei)}")
       {:stop, :normal, state}
     else
@@ -56,6 +61,11 @@ defmodule Playground.Fallback do
       schedule()
       {:noreply, state}
     end
+  end
+
+  def handle_cast(:put, state) do
+    Logger.info("Set the ts of state to now()")
+    {:noreply, %{state | ts: now()}}
   end
 
   def terminate(reason, state) do
