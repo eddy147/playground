@@ -7,7 +7,9 @@ defmodule PlaygroundTest do
 
     for imei <- imeis do
       {:ok, _pid} = Playground.Processor.start_link(imei)
-      
     end
+
+    # wait for 1.5 seconds > 1 second, so the fallback should kick in
+    :timer.sleep(1500)
   end
 end

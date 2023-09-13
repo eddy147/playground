@@ -1,17 +1,32 @@
 defmodule Playground.Processor do
   @moduledoc false
+alias Playground.Fallback
 
   use GenServer
 
   require Logger
 
   def start_link(imei) do
-    Logger.info("Start #{inspect get_name(imei)}")
+    Logger.info("Start #{inspect(get_name(imei))}")
     GenServer.start_link(__MODULE__, imei, name: get_name(imei))
+    GenServer.start(Fallback, %{
+      imei: imei,
+      from_ts: now() - 123_456,
+      to_ts: now(),
+      trip_split_interval_in_seconds: 60,
+      ts: now()
+    }, name: Fallback.get_name(imei))
   end
 
   def init(imei) do
-    state = %{imei: imei, from_ts: now() - 123456, to_ts: now(), trip_split_interval_in_seconds: 60}
+    state = %{
+      imei: imei,
+      from_ts: now() - 123_456,
+      to_ts: now(),
+      trip_split_interval_in_seconds: 60
+    }
+
+    Fallback.put(imei)
     {:ok, state}
   end
 
